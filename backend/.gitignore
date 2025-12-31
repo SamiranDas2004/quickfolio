@@ -1,0 +1,72 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.so
+*.log
+*.pot
+*.sqlite3
+*.db
+
+# ---- Virtual Environment ----
+venv/
+env/
+ENV/
+.venv/
+.ENV/
+
+# ---- FastAPI / Uvicorn ----
+# (No special runtime files, but logs may be generated)
+*.log
+
+# ---- Pydantic cache (if any) ----
+.pydantic/
+
+# ---- VSCode ----
+.vscode/
+*.code-workspace
+
+# ---- PyCharm ----
+.idea/
+*.iml
+
+# ---- Environment Variables ----
+.env
+.env.*
+!.env.example
+
+# ---- Dependency folders ----
+pip-wheel-metadata/
+pip-log.txt
+dist/
+build/
+*.egg-info/
+
+# ---- Byte-compiled / optimized ----
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# ---- Testing ----
+.coverage
+htmlcov/
+.coverage.*
+.cache/
+pytest_cache/
+
+# ---- Mypy ----
+.mypy_cache/
+
+# ---- Ruff / Black / Linters ----
+.ruff_cache/
+astyle.config
+
+# ---- Docker ----
+*.pid
+docker-compose*.override.yml
+
+# ---- OS Files ----
+.DS_Store
+Thumbs.db
