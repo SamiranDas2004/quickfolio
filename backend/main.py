@@ -19,6 +19,7 @@ from auth import authenticate_user, create_access_token, get_current_user, get_p
 from ai_service import process_resume, create_namespace, query_user_data, query_user_data_stream
 from cloudinary_service import upload_resume as upload_to_cloudinary, upload_image
 from cache import get_cache, set_cache, invalidate_user_cache
+from email_service import send_welcome_email, send_resume_processed_email
 
 load_dotenv()
 
@@ -69,6 +70,14 @@ async def signup(user: UserCreate, db: Session = Depends(get_db)):
     
     # Generate access token
     access_token = create_access_token(data={"sub": db_user.username})
+    
+    # Send welcome email
+    print(f"\n=== SENDING WELCOME EMAIL ===")
+    print(f"To: {db_user.email}")
+    print(f"Name: {db_user.name}")
+    print(f"Username: {db_user.username}")
+    email_sent = send_welcome_email(db_user.email, db_user.name, db_user.username)
+    print(f"Email sent status: {email_sent}")
     
     return {
         "user": db_user,
@@ -256,6 +265,14 @@ async def upload_resume(
     db.commit()
     db.refresh(user)
     await invalidate_user_cache(username)
+    
+    # Send resume processed email
+    print(f"\n=== SENDING RESUME PROCESSED EMAIL ===")
+    print(f"To: {user.email}")
+    print(f"Name: {user.name}")
+    print(f"Username: {user.username}")
+    email_sent = send_resume_processed_email(user.email, user.name, user.username)
+    print(f"Email sent status: {email_sent}")
     
     return {
         "message": "Resume processed successfully",
