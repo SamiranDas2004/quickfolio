@@ -27,7 +27,7 @@ load_dotenv()
 create_tables()
 
 app = FastAPI(title="QuickFolio API", version="1.0.0")
-
+# CORS configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000","https://backend.quickfolio.in"],
