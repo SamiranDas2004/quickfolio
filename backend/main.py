@@ -85,6 +85,7 @@ async def signup(user: UserCreate, db: Session = Depends(get_db)):
         "token_type": "bearer"
     }
 
+
 @app.post("/api/auth/login", response_model=Token)
 async def login(login_data: LoginRequest, db: Session = Depends(get_db)):
     user = authenticate_user(db, login_data.username, login_data.password)
