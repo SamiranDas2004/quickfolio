@@ -72,7 +72,7 @@ def send_resume_processed_email(to_email: str, name: str, username: str):
                     <li>✅ Projects</li>
                     <li>✅ Education</li>
                 </ul>
-                <p><a href="http://localhost:3000/{username}" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">View Your Portfolio</a></p>
+                <p><a href="https://quickfolio.in/{username}" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">View Your Portfolio</a></p>
                 <p>You can edit any information in your dashboard.</p>
                 <p>Best regards,<br>The Quickfolio Team</p>
             </div>
