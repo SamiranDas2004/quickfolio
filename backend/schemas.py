@@ -36,11 +36,13 @@ class UserUpdate(BaseModel):
     bio: Optional[str] = None
     avatar_url: Optional[str] = None
     background_preference: Optional[str] = None
+    template_type: Optional[str] = None
     theme_color: Optional[str] = None
     font_family: Optional[str] = None
     social_links: Optional[Dict[str, str]] = None
     skills: Optional[List[str]] = None
     contact: Optional[Dict[str, str]] = None
+    custom_sections: Optional[List[Dict[str, Any]]] = None
 
 class UserResponse(BaseModel):
     id: str
@@ -52,9 +54,11 @@ class UserResponse(BaseModel):
     avatar_url: str
     namespace_id: str
     background_preference: str
+    template_type: str
     social_links: Dict[str, Any]
     skills: List[str]
     contact: Dict[str, Any]
+    custom_sections: List[Dict[str, Any]]
     projects: List[ProjectResponse]
     experiences: List[ExperienceResponse]
     created_at: datetime

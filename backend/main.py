@@ -133,11 +133,18 @@ async def update_user(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
+    print(f"\n=== UPDATING USER {username} ===")
+    print(f"Update data: {user_update.dict(exclude_unset=True)}")
+    
     for field, value in user_update.dict(exclude_unset=True).items():
+        print(f"Setting {field} = {value}")
         setattr(user, field, value)
     
     db.commit()
     db.refresh(user)
+    
+    print(f"User after update - custom_sections: {user.custom_sections}")
+    
     await invalidate_user_cache(username)
     return user
 

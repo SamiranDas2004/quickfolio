@@ -19,9 +19,11 @@ class User(Base):
     avatar_url = Column(String(255), default="")
     namespace_id = Column(String(36), default=lambda: str(uuid.uuid4()))
     background_preference = Column(String(50), default="ripple")
+    template_type = Column(String(50), default="conversational")
     social_links = Column(JSON, default=dict)
     skills = Column(JSON, default=list)
     contact = Column(JSON, default=dict)
+    custom_sections = Column(JSON, default=list)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
