@@ -18,7 +18,7 @@ class User(Base):
     bio = Column(Text, default="")
     avatar_url = Column(String(255), default="")
     namespace_id = Column(String(36), default=lambda: str(uuid.uuid4()))
-    background_preference = Column(String(50), default="ripple")
+    background_preference = Column(String(50), default="vortex")
     template_type = Column(String(50), default="conversational")
     social_links = Column(JSON, default=dict)
     skills = Column(JSON, default=list)
