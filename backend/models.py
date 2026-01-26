@@ -26,10 +26,13 @@ class User(Base):
     custom_sections = Column(JSON, default=list)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+    type_of_user = Column(String(50), default="free")  # 'free' or 'premium'
+    subscription_date = Column(DateTime, nullable=True)
+    subscription_end_date = Column(DateTime, nullable=True)
     projects = relationship("Project", back_populates="user", cascade="all, delete-orphan")
     experiences = relationship("Experience", back_populates="user", cascade="all, delete-orphan")
     analytics = relationship("Analytics", back_populates="user", cascade="all, delete-orphan")
+
     chat_logs = relationship("ChatLog", back_populates="user", cascade="all, delete-orphan")
 
 class Project(Base):

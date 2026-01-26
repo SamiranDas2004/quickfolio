@@ -20,6 +20,7 @@ from ai_service import process_resume, create_namespace, query_user_data, query_
 from cloudinary_service import upload_resume as upload_to_cloudinary, upload_image
 from cache import get_cache, set_cache, invalidate_user_cache
 from email_service import send_welcome_email, send_resume_processed_email
+from routes.payment import router as payment_router
 
 load_dotenv()
 
@@ -45,6 +46,9 @@ app.add_middleware(
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, lambda request, exc: HTTPException(status_code=429, detail="Rate limit exceeded"))
+
+# Include payment routes
+app.include_router(payment_router, prefix="/api/payment", tags=["payment"])
 
 @app.get("/")
 async def root():
