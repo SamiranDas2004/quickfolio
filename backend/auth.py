@@ -22,8 +22,11 @@ def verify_password(plain_password, hashed_password):
 def get_password_hash(password):
     return pwd_context.hash(password[:72])
 
-def authenticate_user(db: Session, username: str, password: str):
-    user = db.query(User).filter(User.username == username).first()
+def authenticate_user(db: Session, identifier: str, password: str):
+    # Try to find user by username or email
+    user = db.query(User).filter(
+        (User.username == identifier) | (User.email == identifier)
+    ).first()
     if not user:
         return False
     if not verify_password(password, user.password):

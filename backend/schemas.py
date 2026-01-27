@@ -68,7 +68,7 @@ class UserResponse(BaseModel):
         from_attributes = True
 
 class LoginRequest(BaseModel):
-    username: str
+    identifier: str
     password: str
 
 class Token(BaseModel):

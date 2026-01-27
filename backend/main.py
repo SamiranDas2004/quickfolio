@@ -96,14 +96,23 @@ async def signup(user: UserCreate, db: Session = Depends(get_db)):
     }
 
 
-@app.post("/api/auth/login", response_model=Token)
+@app.post("/api/auth/login")
 async def login(login_data: LoginRequest, db: Session = Depends(get_db)):
-    user = authenticate_user(db, login_data.username, login_data.password)
+    user = authenticate_user(db, login_data.identifier, login_data.password)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     access_token = create_access_token(data={"sub": user.username})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "name": user.name
+        }
+    }
 
 @app.get("/api/users/{username}", response_model=UserResponse)
 async def get_user(username: str, db: Session = Depends(get_db)):
