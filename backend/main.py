@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Request
+from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
@@ -11,11 +11,12 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from pydantic import validator
+from datetime import timedelta
 
 from database import get_db, engine, create_tables
 from models import User, Project, Experience, Analytics, ChatLog
 from schemas import UserCreate, UserResponse, UserUpdate, LoginRequest, Token, ChatRequest, ChatResponse
-from auth import authenticate_user, create_access_token, get_current_user, get_password_hash
+from auth import authenticate_user, create_access_token, get_current_user, get_password_hash, ACCESS_TOKEN_EXPIRE_DAYS
 from ai_service import process_resume, create_namespace, query_user_data, query_user_data_stream
 from cloudinary_service import upload_resume as upload_to_cloudinary, upload_image
 from cache import get_cache, set_cache, invalidate_user_cache
@@ -41,6 +42,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Set-Cookie"],
 )
 
 limiter = Limiter(key_func=get_remote_address)
@@ -60,7 +62,11 @@ async def check_username(username: str, db: Session = Depends(get_db)):
     return {"available": user is None}
 
 @app.post("/api/auth/signup")
-async def signup(user: UserCreate, db: Session = Depends(get_db)):
+async def signup(user: UserCreate, response: Response, db: Session = Depends(get_db)):
+    print(f"\n=== SIGNUP REQUEST ===")
+    print(f"Username: {user.username}")
+    print(f"Email: {user.email}")
+    
     if db.query(User).filter(User.username == user.username).first():
         raise HTTPException(status_code=400, detail="Username already exists")
     
@@ -80,6 +86,19 @@ async def signup(user: UserCreate, db: Session = Depends(get_db)):
     
     # Generate access token
     access_token = create_access_token(data={"sub": db_user.username})
+    print(f"Access token generated: {access_token[:20]}...")
+    
+    # Set HTTP-only cookie
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=ACCESS_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
+    )
+    print(f"Cookie set: access_token (httponly=True, secure=True, samesite=none, max_age={ACCESS_TOKEN_EXPIRE_DAYS * 24 * 60 * 60}s)")
+    print(f"Cookie expires in: {ACCESS_TOKEN_EXPIRE_DAYS} days")
     
     # Send welcome email
     print(f"\n=== SENDING WELCOME EMAIL ===")
@@ -91,27 +110,64 @@ async def signup(user: UserCreate, db: Session = Depends(get_db)):
     
     return {
         "user": db_user,
-        "access_token": access_token,
-        "token_type": "bearer"
+        "message": "Signup successful"
     }
 
 
 @app.post("/api/auth/login")
-async def login(login_data: LoginRequest, db: Session = Depends(get_db)):
+async def login(login_data: LoginRequest, response: Response, db: Session = Depends(get_db)):
+    print(f"\n=== LOGIN REQUEST ===")
+    print(f"Identifier: {login_data.identifier}")
+    
     user = authenticate_user(db, login_data.identifier, login_data.password)
     if not user:
+        print("Authentication failed: Invalid credentials")
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
+    print(f"User authenticated: {user.username}")
     access_token = create_access_token(data={"sub": user.username})
+    print(f"Access token generated: {access_token[:20]}...")
+    
+    # Set HTTP-only cookie
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=ACCESS_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
+    )
+    print(f"Cookie set: access_token (httponly=True, secure=True, samesite=none, max_age={ACCESS_TOKEN_EXPIRE_DAYS * 24 * 60 * 60}s)")
+    print(f"Cookie expires in: {ACCESS_TOKEN_EXPIRE_DAYS} days")
+    
     return {
-        "access_token": access_token,
-        "token_type": "bearer",
+        "message": "Login successful",
         "user": {
             "id": user.id,
             "username": user.username,
             "email": user.email,
             "name": user.name
         }
+    }
+
+@app.post("/api/auth/logout")
+async def logout(response: Response):
+    print("\n=== LOGOUT REQUEST ===")
+    response.delete_cookie(key="access_token", samesite="none", secure=True)
+    print("Cookie deleted: access_token")
+    return {"message": "Logged out successfully"}
+
+@app.get("/api/auth/me")
+async def get_current_user_info(
+    current_user: User = Depends(get_current_user)
+):
+    print(f"\n=== GET CURRENT USER ===")
+    print(f"User: {current_user.username}")
+    return {
+        "id": current_user.id,
+        "username": current_user.username,
+        "email": current_user.email,
+        "name": current_user.name
     }
 
 @app.get("/api/users/{username}", response_model=UserResponse)
