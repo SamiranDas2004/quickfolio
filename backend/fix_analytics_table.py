@@ -9,3 +9,6 @@ with engine.connect() as conn:
         print("event_data column added successfully!")
     except Exception as e:
         print(f"Column might already exist or error: {e}")
+
+
+
