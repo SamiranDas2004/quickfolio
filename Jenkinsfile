@@ -7,7 +7,7 @@ pipeline {
                 // This uses the 'vps-ssh' credential you created in your first screenshot
                 sshagent(['vps-ssh']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no root@localhost '
+                    sh "ssh -o StrictHostKeyChecking=no root@72.61.169.230 '"
                     cd /root/quickfolio/backend &&
                     git fetch origin &&
                     git checkout master &&
