@@ -451,6 +451,31 @@ async def chat_with_user(
     
     return StreamingResponse(generate(), media_type="text/event-stream")
 
+@app.post("/api/projects/{username}")
+async def create_project(
+    username: str,
+    project_data: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.username != username:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    project = Project(
+        user_id=current_user.id,
+        title=project_data.get("title", ""),
+        description=project_data.get("description", ""),
+        tech_stack=project_data.get("tech_stack", []),
+        github_url=project_data.get("github_url", ""),
+        live_url=project_data.get("live_url", ""),
+        image_url=project_data.get("image_url", "")
+    )
+    db.add(project)
+    db.commit()
+    db.refresh(project)
+    await invalidate_user_cache(username)
+    return project
+
 @app.get("/api/projects/{username}")
 async def get_projects(username: str, db: Session = Depends(get_db)):
     cache_key = f"projects:{username}"
